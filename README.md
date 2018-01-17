@@ -3,6 +3,14 @@ ETL
 
 ETL é um *bitcode* de processamento e transformação de arquivos (ETL) para [Thrust](https://github.com/Thrustjs/thrust).
 
+# Instalação
+
+Posicionado em um app [ThrustJS](https://github.com/thrustjs/thrust), no seu terminal:
+
+```bash
+thrust install etl
+```
+
 ## Tutorial
 
 ```javascript
