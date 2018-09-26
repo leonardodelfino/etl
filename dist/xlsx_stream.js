@@ -3,6 +3,15 @@ var XMLInputFactory = Java.type("javax.xml.stream.XMLInputFactory")
 var XMLStreamConstants = Java.type("javax.xml.stream.XMLStreamConstants")
 var QName = Java.type("javax.xml.namespace.QName")
 
+/**
+ * A dependência abaixo foi gerada a patir de https://github.com/Brunomachadob/ReplaceableInputStream
+ * 
+ * A mesma dependência foi escrita em thrust, e está disponível em: https://github.com/thrust-bitcodes/replaceable-inputstream
+ * Porém, por algum motivo ainda não compreendido, utilizando a versão em Thrust, a leitura do XLSX ainda falha.
+ */
+loadJar('./ReplaceableInputStream.jar')
+var ReplaceableInputStream = Java.type("com.brunomb.io.ReplaceableInputStream")
+
 function XlsxInputStream(filename, sheet, options) {
     this.init(filename, sheet, options)
 }
@@ -137,7 +146,15 @@ XlsxInputStream.prototype = {
                 }
             }
             row.rowId = self.rowId
-            return row
+            
+            // essa modificação foi feita para quando for feito o parse de uma planilha criada apartir do google docs ignore as linhas em branco
+            var propriedades = Object.keys(row).filter(function (el) {
+                return !!row[el]
+            })
+
+            return propriedades.length > 1
+                ? row
+                : {}
         }
 
         while (this.xml_reader.hasNext()) {
@@ -220,6 +237,8 @@ function getSharedStrings(zipFile) {
         }
     }
 
+    strings = new ReplaceableInputStream(strings, "&apos;", "'");
+
     /* Now we have the xml stream with all unique strings, I'll use stax to read the xml and add them to a list */
     // var stringList = new ArrayList();
     var stringList = []
@@ -229,9 +248,7 @@ function getSharedStrings(zipFile) {
         // go to next event
         xmlStreamReader.next()
 
-        // the current event is characters and the content is not all white space
-        if ((xmlStreamReader.getEventType() == XMLStreamConstants.CHARACTERS) && (xmlStreamReader.getText().trim().length() > 0)) {
-            // stringList.add(xmlStreamReader.getText());
+        if (xmlStreamReader.getEventType() == XMLStreamConstants.CHARACTERS) {
             stringList.push(xmlStreamReader.getText())
         }
     }
