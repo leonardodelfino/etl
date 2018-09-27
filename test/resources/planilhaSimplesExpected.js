@@ -14,6 +14,8 @@ exports = [
         "C": "'",
         "D": "&",
         "E": "@Teste",
+        "F": "&Teste",
+        "G": "&Outro &Teste",
         "rowId": 2
     },
     {

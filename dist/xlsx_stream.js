@@ -237,7 +237,16 @@ function getSharedStrings(zipFile) {
         }
     }
 
-    strings = new ReplaceableInputStream(strings, "&apos;", "'");
+    var entityReplacements = {
+        'amp': '&',
+        'apos': '\''
+    }
+
+    var replaceTempChar = '_@@_'
+
+    Object.keys(entityReplacements).forEach(function(entity) {
+        strings = new ReplaceableInputStream(strings, '&' + entity + ';', replaceTempChar + entity + replaceTempChar);
+    })
 
     /* Now we have the xml stream with all unique strings, I'll use stax to read the xml and add them to a list */
     // var stringList = new ArrayList();
@@ -249,7 +258,11 @@ function getSharedStrings(zipFile) {
         xmlStreamReader.next()
 
         if (xmlStreamReader.getEventType() == XMLStreamConstants.CHARACTERS) {
-            stringList.push(xmlStreamReader.getText())
+            var value = Object.keys(entityReplacements).reduce(function(value, entity) {
+                return value.replace(new RegExp(replaceTempChar + entity + replaceTempChar, 'g'), entityReplacements[entity])
+            }, String(xmlStreamReader.getText()))
+
+            stringList.push(value)
         }
     }
 
