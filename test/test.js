@@ -16,6 +16,18 @@ function exec(describe, it, beforeEach, afterEach, expect, should, assert) {
                     expect(values, 'Linha ' + (i + 1)).to.deep.equals(expected[i++])
                 })
         });
+
+        it("Leitura da planilha de planejamento", function () {
+            let file = new java.io.File('resources/planilhaPlanejamento.xlsx').getAbsolutePath()
+            let expected = require('/resources/planilhaPlanejamentoExpected.js')
+            let i = 0;
+
+            etl({})
+                .set_input_xlsx_file(file, 0)
+                .for_each(function (options, values) {
+                    expect(values, 'Linha ' + (i + 1)).to.deep.equals(expected[i++])
+                })
+        });
     });
 }
 
